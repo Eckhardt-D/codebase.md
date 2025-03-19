@@ -31,6 +31,6 @@ node_modules
 
 ## Todo
 
-- [ ] Refactor the walk to collect file paths for second pass
-- [ ] Add support for output
-- [ ] Check .gitignore for ignored files
+- [x] Refactor the walk to collect file paths for second pass
+- [x] Add support for output
+- [x] Check .gitignore for ignored files (partial)
