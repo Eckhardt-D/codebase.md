@@ -147,7 +147,8 @@ fn printFileTree(ctx: *Context, dir: fs.Dir, depth: usize, current_dirname: ?[]c
         }
 
         if (entry.kind == .directory) {
-            const inner_dir = try dir.openDir(entry.name, .{.iterate = true});
+            var inner_dir = try dir.openDir(entry.name, .{.iterate = true});
+            defer inner_dir.close();
             try printFileTree(ctx, inner_dir, depth + 1, entry.name);
         } else if (entry.kind == .file) {
             const path = try dir.realpathAlloc(ctx.allocator, entry.name);
