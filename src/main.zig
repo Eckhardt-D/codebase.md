@@ -58,7 +58,6 @@ pub fn main() !void {
                 const output_path = next_arg;
                 const output_file = try fs.cwd().createFile(output_path, .{.mode=0o666});
                 ctx.output_file = output_file;
-                continue;
             } else {
               try config.stdout.writer().print("Missing output file path\n", .{});
               return;
@@ -68,7 +67,6 @@ pub fn main() !void {
         if (std.mem.eql(u8, arg, "--ignore-path")) {
             if (args.next()) |next_arg| {
                 config.ignore_filepath = next_arg;
-                continue;
             } else {
                 try config.stdout.writer().print("Missing ignore file path\n", .{});
                 return;
