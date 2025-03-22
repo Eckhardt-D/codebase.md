@@ -1,5 +1,8 @@
 name: Build and Release
 
+permissions:
+  contents: write
+
 # Trigger on pushes to main and pull requests, plus tags for releases
 on:
   push:
