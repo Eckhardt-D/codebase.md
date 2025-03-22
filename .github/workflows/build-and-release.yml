@@ -1,0 +1,76 @@
+name: Build and Release
+
+# Trigger on pushes to main and pull requests, plus tags for releases
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*.*.*'  # e.g., v0.1.0
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build for ${{ matrix.target }}
+    runs-on: ubuntu-latest  # Use Ubuntu as the base OS for cross-compilation
+    strategy:
+      matrix:
+        target:
+          - { os: linux, triple: x86_64-linux-gnu, ext: '' }
+          - { os: macos, triple: aarch64-macos-none, ext: '' }
+          - { os: windows, triple: x86_64-windows-gnu, ext: .exe }
+    steps:
+      # Checkout the repository
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # Set up Zig
+      - name: Setup Zig
+        uses: mlugg/setup-zig@v1
+        with:
+          version: 0.14.0  # Matches your minimum_zig_version
+
+      # Build the application for the target platform
+      - name: Build
+        run: |
+          zig build -Dtarget=${{ matrix.target.triple }} -Doptimize=ReleaseSafe
+          # Rename the binary for clarity
+          mv zig-out/bin/codebase_md${{ matrix.target.ext }} zig-out/bin/codebase_md-${{ matrix.target.os }}${{ matrix.target.ext }}
+
+      # Upload artifacts for inspection (all runs)
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: codebase_md-${{ matrix.target.os }}
+          path: zig-out/bin/codebase_md-${{ matrix.target.os }}${{ matrix.target.ext }}
+
+  release:
+    name: Create Release
+    needs: build  # Only run if build succeeds
+    if: startsWith(github.ref, 'refs/tags/v')  # Only on version tags
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout the repository
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # Download all artifacts from the build job
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      # Create or update the release and upload binaries
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifacts/codebase_md-linux/codebase_md-linux
+            artifacts/codebase_md-macos/codebase_md-macos
+            artifacts/codebase_md-windows/codebase_md-windows.exe
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
