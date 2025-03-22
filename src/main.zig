@@ -14,7 +14,7 @@ const help_text =
   ;
 
 const Config = struct {
-    stdout: fs.File = std.io.getStdOut(),
+    stdout: fs.File,
     input_path: []const u8 = ".",
     max_depth: usize = 10,
     ignore_filepath: []const u8 = ".gitignore",
@@ -44,7 +44,10 @@ pub fn main() !void {
 
     var args = try std.process.argsWithAllocator(allocator);
 
-    var config = Config{};
+    var config = Config{
+        .stdout = std.io.getStdOut(),
+    };
+
     var ctx = Context.init(allocator, &config);
 
     while(args.next()) |arg| {
