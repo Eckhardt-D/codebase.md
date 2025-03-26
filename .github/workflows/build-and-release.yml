@@ -40,14 +40,14 @@ jobs:
         run: |
           zig build -Dtarget=${{ matrix.target.triple }} -Doptimize=ReleaseSafe
           # Rename the binary for clarity
-          mv zig-out/bin/codebase_md${{ matrix.target.ext }} zig-out/bin/codebase_md-${{ matrix.target.os }}${{ matrix.target.ext }}
+          mv zig-out/bin/codemd${{ matrix.target.ext }} zig-out/bin/codemd-${{ matrix.target.os }}${{ matrix.target.ext }}
 
       # Upload artifacts for inspection (all runs)
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: codebase_md-${{ matrix.target.os }}
-          path: zig-out/bin/codebase_md-${{ matrix.target.os }}${{ matrix.target.ext }}
+          name: codemd-${{ matrix.target.os }}
+          path: zig-out/bin/codemd-${{ matrix.target.os }}${{ matrix.target.ext }}
 
   release:
     name: Create Release
@@ -70,9 +70,9 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            artifacts/codebase_md-linux/codebase_md-linux
-            artifacts/codebase_md-macos/codebase_md-macos
-            artifacts/codebase_md-windows/codebase_md-windows.exe
+            artifacts/codemd-linux/codemd-linux
+            artifacts/codemd-macos/codemd-macos
+            artifacts/codemd-windows/codemd-windows.exe
           draft: false
           prerelease: false
         env:
