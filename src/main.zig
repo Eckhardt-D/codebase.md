@@ -137,8 +137,11 @@ fn printFileTree(ctx: *Context, dir: fs.Dir, depth: usize, current_dirname: ?[]c
     var iter = dir.iterate();
 
     if (current_dirname) |name| {
-      if (ctx.ignore_files.contains(name)) {
-          return;
+      if(ctx.ignore_files.getKey(name)) |key| {
+          if (std.mem.startsWith(u8, name, key)
+              or std.mem.endsWith(u8, name, key)) {
+              return;
+          }
       }
 
       try out_writer.print("- {s}\n", .{name});
@@ -154,6 +157,13 @@ fn printFileTree(ctx: *Context, dir: fs.Dir, depth: usize, current_dirname: ?[]c
             defer inner_dir.close();
             try printFileTree(ctx, inner_dir, depth + 1, entry.name);
         } else if (entry.kind == .file) {
+            if (ctx.ignore_files.getKey(entry.name)) |key| {
+                if (std.mem.startsWith(u8, entry.name, key)
+                    or std.mem.endsWith(u8, entry.name, key)) {
+                    continue;
+                }
+            }
+
             const path = try dir.realpathAlloc(ctx.allocator, entry.name);
             try ctx.filepaths.append(path);
             try out_writer.print("- {s}\n", .{entry.name});
